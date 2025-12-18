@@ -1,0 +1,48 @@
+services:
+  otel-lgtm:
+    image: grafana/otel-lgtm
+    container_name: nccl-profiler-otel-lgtm
+    ports:
+      - "3000:3000"   # Grafana UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus metrics endpoint (for debugging)
+      - "9090:9090"   # Prometheus web UI
+    volumes:
+      # Dashboard provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
+      - ./dashboards/dashboards.yml:/otel-lgtm/grafana/conf/provisioning/dashboards/dashboards.yml
+      # Custom configurations - correct paths for grafana/otel-lgtm image
+      - ./otel-collector-config.yaml:/otel-lgtm/otelcol-config.yaml
+      - ./prometheus.yaml:/otel-lgtm/prometheus.yaml
+      - ./grafana.ini:/etc/grafana/grafana.ini
+      - ./recording-rules.yaml:/otel-lgtm/recording-rules.yaml
+    environment:
+      # Enable debug logging if needed (uncomment for troubleshooting)
+      # - OTEL_LOG_LEVEL=debug
+      # Grafana settings
+      - GF_DASHBOARDS_MIN_REFRESH_INTERVAL=1s
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    networks:
+      - nccl-profiler
+
+  pipeline-analyzer:
+    build:
+      context: .
+      dockerfile: Dockerfile.pipeline-analyzer
+    container_name: nccl-profiler-pipeline-analyzer
+    ports:
+      - "55001:5000"   # Pipeline Analysis API (host:container)
+    environment:
+      - METRICS_ENDPOINT=http://otel-lgtm:8889/metrics
+      - PORT=5000
+    depends_on:
+      - otel-lgtm
+    networks:
+      - nccl-profiler
+    restart: unless-stopped
+
+networks:
+  nccl-profiler:
+    driver: bridge

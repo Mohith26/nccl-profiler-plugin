@@ -1,0 +1,39 @@
+# Configuration for Prometheus config generation
+#
+# Each host entry requires:
+#   - name:    Hostname suffix to append to job names (e.g., host_a)
+#   - address: IP address or hostname to scrape metrics from
+#
+# Optional port overrides (defaults shown):
+#   - gpu_exporter_port: 5053
+#   - gpu_pcie_port: 5052
+#   - node_exporter_port: 9100
+#   - process_exporter_port: 9256
+#
+# Usage:
+#   1. Copy this file to prometheus-config-generate.yaml
+#   2. Add/modify host entries
+#   3. Run: ./prometheus-config-generate.sh
+
+hosts:
+  # Example with IP address and default ports
+  - name: host_a
+    address: 100.200.300.400
+
+  # Example with hostname and default ports
+  - name: host_b
+    address: host_b
+
+  # Example with custom port override
+  - name: host_c
+    address: host_c
+    # Override default node_exporter port (9100)
+    node_exporter_port: 9191
+
+  # Example with all ports overridden
+  - name: custom_host
+    address: 10.20.1.128
+    gpu_exporter_port: 5060
+    gpu_pcie_port: 5061
+    node_exporter_port: 9191
+    process_exporter_port: 9300

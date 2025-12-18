@@ -1,0 +1,9 @@
+# Used to override the default prometheus configuration when running on AMD hardware that has
+# the amd-gpu-monitoring stack running.
+# Use in conjunction with the prometheus-config-generate.sh script to generate the prometheus configuration
+# necessary to scrape the additional metrics from the amd-gpu-monitoring stack.
+
+services:
+  otel-lgtm:
+    volumes:
+      - ./prometheus-amd.yaml:/otel-lgtm/prometheus.yaml

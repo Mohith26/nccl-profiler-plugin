@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements-pipeline.txt .
+RUN pip install --no-cache-dir -r requirements-pipeline.txt
+
+# Copy the application files
+COPY analyze_pipelines.py .
+COPY pipeline_server.py .
+
+# Expose the service port
+EXPOSE 5000
+
+# Health check - simple HTTP GET to /health endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"
+
+# Run the server
+CMD ["python3", "pipeline_server.py"]
